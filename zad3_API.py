@@ -18,12 +18,12 @@ COUNTRIES_NUMBER = 15
         
 if __name__ == "__main__":
 
-    url = "http://universities.hipolabs.com/search?country="    
+    url = "http://universities.hipolabs.com/search"    
     resp = requests.get(url)
     universities = resp.json()
 
     countries = set() #Zapobieganie powtorzeniom
-
+    
     for university in universities:
         country = university['country'] # country to klucz slownika university
         if country:
@@ -34,10 +34,20 @@ if __name__ == "__main__":
         all_country_list.append(country)
     
     random_countries = random.sample(all_country_list, COUNTRIES_NUMBER)
-    # print(f"All random countries: \n{random_countries}\n First random country: {random_countries[0]} ")
+         
+    country_universities = {}
     
-    for i in range(COUNTRIES_NUMBER):
-        print(random_countries[i]) 
+    for country in random_countries:
+        country_url = f"{url}?country={country}"
+        country_resp = requests.get(country_url)
+        country_universities[country] = [uni_name['name'] for uni_name in country_resp.json()]
+
+    for country, universities in country_universities.items():
+        print(f"\nCountry: {country}")
+        for university in universities:
+            print(f"- {university}")
+            
+    
     
 
 
