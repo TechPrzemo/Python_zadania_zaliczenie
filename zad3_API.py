@@ -81,27 +81,3 @@ if __name__ == "__main__":
     print(f"Ilość państw: {country_count}")
     print(f"Ogolna ilość znalezionych uniwersytetów: {all_uni_count}")
     
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-# def thread_function(number):
-#     logging.info(f"Watek %d: rozpoczal sie {number}")
-#     time.sleep(2)
-#     logging.info(f"Watek %d: zakonczyl sie {number}")    
-
-# if __name__ == "__main__":
-#     logging.basicConfig(level=logging.INFO)
-    
-#     with concurrent.futures.ThreadPoolExecutor(max_workers=24) as executor:
-#         executor.map(thread_function, range(24))
