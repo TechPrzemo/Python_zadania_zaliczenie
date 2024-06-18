@@ -8,45 +8,78 @@ wielowątkowego pobierania informacji.
 """
 
 import requests
-import threading
-import concurrent.futures
+
+from concurrent.futures import ThreadPoolExecutor
 import random
-from bs4 import BeautifulSoup
+import time
 
 COUNTRIES_NUMBER = 15
+MAX_THREAD_NUMBER = 16
 
-        
+def fetch_univer_for_country(country):
+    url = "http://universities.hipolabs.com/search" 
+    country_url = f"{url}?country={country}"
+    country_resp = requests.get(country_url)
+    return country, [uni_name['name'] for uni_name in country_resp.json()]
+
+def fetch_country():
+    url = "http://universities.hipolabs.com/search" 
+    univer_resp = requests.get(url)
+    universities = univer_resp.json()
+    return universities
+
 if __name__ == "__main__":
-
-    url = "http://universities.hipolabs.com/search"    
-    resp = requests.get(url)
-    universities = resp.json()
-
+    start = time.time()
+    
     countries = set() #Zapobieganie powtorzeniom
     
+    universities = []
+    
+    with ThreadPoolExecutor(max_workers=MAX_THREAD_NUMBER) as executor:
+        thread_results_1 = {executor.submit(fetch_country)}
+        
+        for result_1 in thread_results_1:
+            university_1 = result_1.result()
+            universities = university_1
+        
     for university in universities:
         country = university['country'] # country to klucz slownika university
         if country:
             countries.add(country)
-    
-    all_country_list, random_countries = [], []
-    for country in countries:
-        all_country_list.append(country)
-    
+        
+    all_country_list = list(countries)
     random_countries = random.sample(all_country_list, COUNTRIES_NUMBER)
          
     country_universities = {}
     
-    for country in random_countries:
-        country_url = f"{url}?country={country}"
-        country_resp = requests.get(country_url)
-        country_universities[country] = [uni_name['name'] for uni_name in country_resp.json()]
+    with ThreadPoolExecutor(max_workers=MAX_THREAD_NUMBER) as executor:
+        for country in random_countries:
+            thread_results_2 = {executor.submit(fetch_univer_for_country, country)} #Utworzenie słownika
+            
+            for result_2 in thread_results_2:
+                country, university_2 = result_2.result()
+                country_universities[country] = university_2
+    
+    # for country in random_countries:
+    #     country_url = f"{url}?country={country}"
+    #     country_resp = requests.get(country_url)
+    #     country_universities[country] = [uni_name['name'] for uni_name in country_resp.json()]
 
+    country_count = 0
+    all_uni_count = 0
     for country, universities in country_universities.items():
+        each_uni_count = 0
         print(f"\nCountry: {country}")
+        country_count += 1
         for university in universities:
             print(f"- {university}")
+            each_uni_count +=1
+            all_uni_count +=1
+        print(f"Ilość uniwersytetów w: {country} - {each_uni_count}")
             
+    print(f"\nCzas szukania:: {time.time() - start} sekund ") 
+    print(f"Ilość państw: {country_count}")
+    print(f"Ogolna ilość znalezionych uniwersytetów: {all_uni_count}")
     
     
 
