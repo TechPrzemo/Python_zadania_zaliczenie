@@ -1,3 +1,5 @@
+import multiprocessing
+
 def is_prime(n):
     if n <= 1:
         return False
@@ -24,8 +26,29 @@ def find_primes(start, end):
             prime_pairs.append((primes[prim_num], primes[prim_num+1]))
     return prime_pairs
 
-
+def main(START_RANGE, END_RANGE):
+    NUM_OF_PROCESSES = 4
+    CHUNK_SIZE = (END_RANGE - START_RANGE) // NUM_OF_PROCESSES
+    
+    pool = multiprocessing.Pool(NUM_OF_PROCESSES)
+    ranges = [(i, min(i+CHUNK_SIZE, END_RANGE)) for i in range(START_RANGE, END_RANGE, CHUNK_SIZE)]
+    print(ranges)
+    results = pool.starmap(find_primes, ranges)
+    pool.close()
+    pool.join()
+    
+    combined_result = []  
+    for result in results:
+        combined_result.append(result)
+    return combined_result
+        
+        
 if __name__ == '__main__':
-    result = find_primes(1, 1000)
-    print(result)
+    START_RANGE = 1 
+    END_RANGE = 1000
+    primes_pair = main(START_RANGE, END_RANGE)
+    print(f"Pary bliźniaczych liczb pierwszych dla zakresu: {START_RANGE} do {END_RANGE}:\n {primes_pair}")
+    
+    # result = find_primes(1, 1000)
+    # print(result)
     
