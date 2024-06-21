@@ -24,7 +24,7 @@ def decorative_function(*args, **kwargs):
 
 #Main program
 if __name__ == "__main__":
-    
+
     #Examples 
     t = 1,2,3,4,5
     i = 6
